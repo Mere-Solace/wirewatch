@@ -1,41 +1,104 @@
+# ===== C / C++ =====
+
+# build output — always build out-of-source (cmake -B build / presets)
+build/
+out/
+cmake-build-*/
+
+# objects, precompiled headers, dependency files
+*.o
+*.obj
+*.lo
+*.slo
+*.gch
+*.pch
+*.d
+
+# libraries
+*.a
+*.lib
+*.la
+*.lai
+*.so
+*.so.*
+*.dylib
+*.dll
+
+# executables
+*.exe
+*.out
+*.app
+
+# debug symbols
+*.pdb
+*.ilk
+*.dwo
+*.dSYM/
+
+# coverage / profiling
+*.gcno
+*.gcda
+*.gcov
+*.profraw
+*.profdata
+
+# libFuzzer artifacts (seed inputs come from testdata/, not here)
+crash-*
+leak-*
+timeout-*
+oom-*
+slow-unit-*
+sensor/fuzz/corpus/
+
+# Npcap SDK, if unzipped inside the repo
+npcap-sdk*/
+
+# ===== CMake =====
 CMakeLists.txt.user
 CMakeCache.txt
-CMakeFiles
-CMakeScripts
-Testing
+CMakeFiles/
+CMakeScripts/
+Testing/
 Makefile
 cmake_install.cmake
 install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
-_deps
+_deps/
 CMakeUserPresets.json
 
-# CLion
-#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
-#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
-#  and can be added to the global gitignore or merged into this file.  For a more nuclear
-#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
-#cmake-build-*
+# ===== editors / OS =====
+.idea/
+.vs/
+.vscode/*
+!.vscode/extensions.json
+.cache/
+*.swp
+*~
+.DS_Store
+Thumbs.db
 
-# python
+# ===== python =====
 __pycache__/
 *.py[cod]
 .venv/
 venv/
 .env
 
-# captures / data
+# ===== captures / data =====
 *.pcap
 *.pcapng
 data/
 captures/
+# ...except the committed test fixtures
+!testdata/pcap/*.pcap
+!testdata/pcap/*.pcapng
 
-# --- project ---
+# ===== project =====
 notes/
 CLAUDE.md
 .claude/
 
-# node
+# ===== node =====
 node_modules/
 dist/

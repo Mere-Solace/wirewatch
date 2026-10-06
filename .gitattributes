@@ -1,0 +1,16 @@
+# Normalize text files to LF in the repo and on checkout, on every OS.
+# Keeps golden .jsonl files and scripts byte-identical across Linux/macOS/Windows.
+* text=auto eol=lf
+
+# Windows-only scripts need CRLF to run correctly
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+
+# Binary: never touch line endings, never diff/merge as text
+*.pcap    binary
+*.pcapng  binary
+*.png     binary
+*.jpg     binary
+*.ico     binary
+*.pdf     binary
+*.zip     binary
