@@ -1,4 +1,4 @@
-# net-utils
+# Wirewatch
 
 A descriptive network health monitor that shows you why your network is slowing down.
 
@@ -18,10 +18,18 @@ Initialized for CS4622 (Computer Networks) at Kennesaw State University.
 
 Team:
 
+Capture & Metrics:
+
 `Mere-Solace` -
-`Aveon` -
-`cjusino13` -
+`cjusino13`
+
+Threat Detection:
+
 `EvanMc1` -
 `KaiJGlaza` -
-`maitrip7` -
+`maitrip7`
+
+Data & Dashboard
+
+`Aveon` -
 `NanoFerreira`
