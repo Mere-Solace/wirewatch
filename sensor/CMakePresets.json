@@ -7,6 +7,26 @@
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
       }
+    },
+    { 
+      "name": "windows",
+      "inherits": "default",
+      "binaryDir": "${sourceDir}/build/windows",
+      "cacheVariables": {
+        "VCPKG_APPLOCAL_DEPS": "OFF"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "windows",
+      "configurePreset": "windows",
+      "configuration": "Debug"
     }
   ]
 }

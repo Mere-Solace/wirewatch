@@ -61,46 +61,67 @@ The first configure takes a few minutes while vcpkg builds the dependencies. Lat
 #### 4. Run
 
 ```sh
-./build/src/app/sensor            # list network interfaces
-./build/src/app/sensor <iface>    # capture on an interface, e.g. eth0 or en0
+./build/bin/sensor            # list network interfaces
+./build/bin/sensor <iface>    # capture on an interface, e.g. eth0 or en0
 ```
 
 > **macOS:** capturing requires access to `/dev/bpf*`. Run the sensor with `sudo`, or install Wireshark's *ChmodBPF* helper to capture as a regular user.
 
 ### Windows
 
-_TBD._
+#### 1. Install the prerequisites
 
-<!--
-Draft notes:
-Compiler: Visual Studio 2026 Community with *Desktop Development with C++* workload
-CMake: https://cmake.org/download/
-Set VCPKG_ROOT:  $env:VCPKG_ROOT = "path to your vcpkg installation"
-Then run:        cmake --preset default
--->
+- [Visual Studio](https://visualstudio.microsoft.com/) 2022 or newer with the **Desktop development with C++** workload (this includes CMake and vcpkg)
+- [Npcap](https://npcap.com/#download), the packet capture driver. The default install options are fine.
+
+#### 2. Build
+
+Open **Developer PowerShell for VS** from the Start menu. It already has `VCPKG_ROOT` set to the copy of vcpkg that ships with Visual Studio. From the `sensor/` directory:
+
+```powershell
+cmake --preset windows
+cmake --build --preset windows
+```
+
+The first configure takes a few minutes while vcpkg builds the dependencies. Later builds are cached.
+
+> Using your own vcpkg clone instead? Set a `VCPKG_ROOT` user environment variable pointing at it and you can build from any PowerShell window.
+
+#### 3. Run
+
+```powershell
+.\build\windows\bin\Debug\sensor.exe                  # list network interfaces
+.\build\windows\bin\Debug\sensor.exe "\Device\NPF_{...}"  # capture on an interface
+```
+
+Copy an interface name from the list. Keep the quotes, because PowerShell treats `{...}` as a script block and cuts the name off.
+
+> **No interfaces listed?** Make sure Npcap is installed. If you installed it with *Restrict Npcap driver's access to Administrators only*, run the sensor from an administrator terminal.
 
 ---
-Currently in development 
 
+**Currently in development** 
 
-Initialized for CS4622 (Computer Networks) at Kennesaw State University.
+---
 
-Team:
+>Initialized for CS4622 (Computer Networks) at Kennesaw State University.
 
-Capture & Metrics:
+### Team:
+
+**Capture & Metrics:**
 
 `Mere-Solace` -
 `cjusino13`
 
 
-Threat Detection:
+**Threat Detection:**
 
 `EvanMc1` -
 `KaiJGlaza` -
 `maitrip7`
 
 
-Data & Dashboard:
+**Data & Dashboard:**
 
 `Aveon` -
 `NanoFerreira`

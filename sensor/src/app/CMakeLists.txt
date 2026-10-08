@@ -22,3 +22,15 @@ target_link_libraries(sensor
 		capture
 		fmt::fmt
 )
+
+if(WIN32)
+  target_link_options(sensor
+    PRIVATE
+      "/DELAYLOAD:wpcap.dll"
+      "/DELAYLOAD:Packet.dll"
+  )
+  target_link_libraries(sensor
+    PRIVATE
+      delayimp
+  )
+endif()
