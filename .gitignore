@@ -5,6 +5,9 @@ build/
 out/
 cmake-build-*/
 
+# vcpkg
+vcpkg_installed/
+
 # objects, precompiled headers, dependency files
 *.o
 *.obj
@@ -42,7 +45,7 @@ cmake-build-*/
 *.profraw
 *.profdata
 
-# libFuzzer artifacts (seed inputs come from testdata/, not here)
+# libFuzzer artifacts 
 crash-*
 leak-*
 timeout-*
@@ -90,7 +93,7 @@ venv/
 *.pcapng
 data/
 captures/
-# ...except the committed test fixtures
+# ! except the committed test fixtures
 !testdata/pcap/*.pcap
 !testdata/pcap/*.pcapng
 
