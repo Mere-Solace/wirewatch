@@ -7,5 +7,6 @@ target_sources(sensor
 
 target_link_libraries(sensor 
 	PRIVATE
+		capture
 		fmt::fmt
 )
