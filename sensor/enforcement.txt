@@ -1,0 +1,122 @@
+WIREWATCH SENSOR ENFORCEMENT RULES
+MUST is blocking. SHOULD is a strong default; deviating requires a stated reason.
+
+LANGUAGE AND BUILD
+- MUST compile as C++20 and C17 with -Wall -Wextra -Wpedantic -Werror (MSVC: /W4 /WX /permissive-).
+- MUST build on GCC, Clang, and MSVC and MUST NOT rely on compiler-specific extensions.
+- MUST NOT contain undefined behavior: signed overflow reliance, type punning through casts, uninitialized reads, out-of-bounds access.
+- MUST mark a variable const when it is not reassigned in its scope, and a member function const when it does not mutate observable state.
+- MUST use constexpr for compile-time constants and for functions evaluable at compile time.
+- SHOULD keep interfaces const-correct: non-owning inputs by const reference or by value; return const references where ownership is not transferred.
+- SHOULD destructure pairs, tuples, and aggregates with structured bindings instead of .first/.second or repeated member access.
+- MUST use US English spelling in identifiers, comments, docs, and log strings.
+- MUST keep every C and C++ file formatted exactly as the pinned clang-format version writes it.
+- MUST keep the tree clean under the project .clang-tidy set: bugprone-*, performance-*, a function size limit of 80 lines, and a cognitive complexity limit of 25.
+- A tidy baseline, if one exists, is a ratchet: its count may fall and MUST NOT rise.
+- A suppression MUST be written as // NOLINTNEXTLINE(check) -- reason on the line above the code; the reason is required and the comment MUST fit on one line.
+
+MEMORY SAFETY
+- MUST use RAII for every resource: memory, files, sockets, capture handles, threads.
+- MUST NOT use owning raw pointers or manual new/delete in application code.
+- Single ownership uses std::unique_ptr. Shared ownership uses std::shared_ptr, and every shared_ptr MUST be justified.
+- MUST pass non-owning access as a reference, pointer, std::span, or std::string_view, and MUST NOT transfer ownership implicitly.
+- MUST stay clean under ASan, UBSan, and LSan in CI.
+- SHOULD prefer stack, arena, or pool allocation in hot paths.
+
+TESTABILITY AND DETERMINISM
+- MUST keep parsing, metric, and analysis logic in pure, side-effect-free functions wherever feasible.
+- MUST inject dependencies such as clock, RNG, network, and filesystem; no hidden globals or stateful singletons in project code.
+- MUST have doctest coverage for all parsing, metric math, and serialization/deserialization.
+- MUST keep analysis deterministic: no wall-clock reads inside analysis logic, seeded RNG only, no uninitialized reads.
+- SHOULD make every bug reproducible from a recorded input.
+
+ERROR HANDLING
+- Errors at module and ABI boundaries MUST be values (error codes or std::expected), never exceptions.
+- Exceptions MUST NOT cross a C ABI or a language boundary.
+- Every error MUST state what happened, why it happened, and what to do next.
+- MUST NOT surface a raw stack trace, errno, or compiler dump as the only message.
+- Errors SHOULD be logged through the single project logger.
+
+NO CIRCULAR DEPENDENCIES OR INCLUDES
+- MUST use #pragma once in every header.
+- MUST respect the downward-only layer order app -> capture -> core; a lower layer never includes a higher one.
+- MUST break would-be cycles with forward declarations, or with interfaces or callbacks defined in the lower layer.
+- MUST keep headers minimal: include only what you use and prefer forward declarations in headers (checked with clang-tidy misc-include-cleaner).
+- An include the tool is wrong about keeps // IWYU pragma: keep -- reason on the same line.
+- A dependency cycle check MUST run in CI and fail the build on any cycle.
+
+CROSS-PLATFORM CORRECTNESS (WINDOWS, LINUX, MACOS)
+- MUST use std::filesystem for all paths, with no hardcoded separators and no drive-letter assumptions.
+- MUST treat filenames the sensor creates as lowercase ASCII with no spaces; Linux is case-sensitive.
+- MUST handle both CRLF and LF on text input and output.
+- MUST NOT call OS-specific APIs outside the platform layer; everything else goes through that abstraction.
+- MUST serialize any data leaving the process explicitly, with defined endianness and a schema, and MUST NOT memcpy raw structs onto the network or into files.
+
+NETWORKING DISCIPLINE
+- MUST treat all inbound data as hostile: validate, bounds-check, and length-check before use.
+- MUST size-cap and rate-limit every inbound message and reject malformed input without crashing.
+
+WIRE TYPES STAY IN SYNC
+- A value that crosses a process boundary is mirrored in a chain: the C++ type, the schema, the encode/decode functions, and the mapping between them.
+- MUST add a new field to EVERY mirror in that chain; a field missing from one mirror is silently dropped and arrives as a default.
+- MUST cover every wire-crossing type with a round-trip completeness test that sets every field to a distinct non-default value and asserts equality.
+- MUST give any newly added field a distinct non-default value in that test.
+- SHOULD generate the mirrors and mapping from one source once manual parity becomes the likely failure.
+
+MODULARITY AND FILE SHAPE
+- Entry-point TUs (main.cxx and similar) are switching fabric only and MUST NOT define domain constants, domain structs, or algorithms.
+- MUST give each TU one responsibility; a file named for a system contains only that system.
+- A new subsystem MUST arrive as its own header and TU in the commit that introduces it, never appended to an existing file for later extraction.
+- MUST split a subsystem into a TU per axis when its second axis appears, not after the file has grown.
+- MUST name a TU for the system it holds.
+- A TU or header crossing 400 lines MUST be flagged in CI; an over-limit file may shrink but MUST NOT grow without a reason in the commit.
+- The same literal constant with the same name and value MUST NOT be defined in two entry-point TUs.
+
+A USER-FACING FEATURE REACHES THE RUNNING APP
+- A feature is not done until it can be exercised from the running sensor, not only from tests.
+- MUST state in the commit or PR exactly how to reach the feature (command, flag, or input).
+
+A HEADER IS A CONTRACT
+- A header comment exists for a caller and MUST be limited to what the signature does not say: contract, units, ranges, preconditions, lifetime, ordering, and traps.
+- MUST NOT restate the signature in prose.
+- Design rationale MUST live in the TU that implements it or in a decision record, never in the header.
+- History ("this used to be X") MUST NOT appear in headers.
+- SHOULD give each class a header comment stating what the type is and its ownership and lifetime.
+- Test every header comment line: would a caller make a mistake without it? If not, move it or delete it.
+
+A CLAIM IN A COMMENT IS A CLAIM A TEST MAKES TRUE
+- MUST NOT state a return value, cap, tier, or ordering guarantee in a comment unless a test asserts it or the signature already says it.
+
+A MOVE IS NOT DONE WHEN IT COMPILES
+- MUST delete a comment when deleting the declaration it documents.
+- MUST grep for the definition after removing a declaration, and for the declaration after removing a definition.
+- MUST update every comment and doc that names something renamed, in the same commit.
+- MUST NOT run a name-based find-and-replace over string literals; a string is data.
+- MUST re-verify a trap comment when moving it rather than transcribing it.
+
+A PATH THAT EXISTS TWICE IS TESTED TWICE
+- A loader or input path with a quick form and a real form MUST have a test that exercises the real one.
+
+COMPILE WHAT YOU SHIP
+- MUST compile every artifact a consumer builds against in a CI check.
+- MUST NOT treat a checked-in binary as proof that something still builds.
+- A check that cannot run because a toolchain is absent MUST skip loudly; a skip is not a pass.
+
+PERFORMANCE
+- MUST NOT allocate on the heap in per-packet hot paths.
+- MUST profile before optimizing; no speculative optimization that hurts readability without a measurement.
+- MUST take performance measurements in a Release build before drawing conclusions.
+- MUST record a negative result in the commit when a suspected cost turns out not to be one.
+- Profiling instrumentation MUST only observe; nothing reads a measurement back into processing logic.
+
+BEFORE A COMMIT
+- The pre-commit hook MUST be installed and MUST NOT be skipped with --no-verify.
+- After any rename or move, grep for the old name across code, comments, docs, and tests and expect zero hits.
+- After removing any declaration, grep for its definition and expect zero hits.
+
+BEFORE A MERGE
+- The build is clean with -Werror on every CI platform.
+- Sanitizers are green and all tests pass.
+- No dependency cycle exists.
+- Every user-facing feature is reachable in the running app, with the steps stated.
+- Every error message is clear and actionable.

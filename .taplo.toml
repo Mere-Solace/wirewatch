@@ -1,0 +1,8 @@
+include = ["**/*.toml"]
+exclude = [".venv/**", "**/build/**", "**/vcpkg_installed/**"]
+
+[[rule]]
+include = ["pyproject.toml"]
+
+[rule.schema]
+url = "https://json.schemastore.org/pyproject.json"
