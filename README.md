@@ -152,8 +152,6 @@ Calling the C++ functions from python does not retain (or ever grant) the proper
 
 **Capture & Metrics:**
 
-Capture & Metrics:
-
 `Mere-Solace` -
 `cjusino13`
 
