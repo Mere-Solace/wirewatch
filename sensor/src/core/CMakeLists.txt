@@ -2,10 +2,10 @@ add_library(core)
 
 target_sources(core
 	PRIVATE 
-		packet.c
+		packet.cxx
 		
 	PUBLIC
 	FILE_SET HEADERS
 		FILES
-			packet.h
+			packet.hxx
 )

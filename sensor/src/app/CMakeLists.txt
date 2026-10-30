@@ -34,3 +34,5 @@ if(WIN32)
       delayimp
   )
 endif()
+
+install(TARGETS sensor RUNTIME DESTINATION wirewatch/backend/bin)

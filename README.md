@@ -9,7 +9,13 @@ Packet-level network health monitor. Captures traffic, measures network health, 
 
 ## Quickstart
 
-The sensor is C++20 and built with CMake. Its dependencies ([PcapPlusPlus](https://pcapplusplus.github.io/) and [fmt](https://fmt.dev/)) are installed automatically by [vcpkg](https://vcpkg.io/) the first time you configure.
+Wirewatch has two parts: a C++20 **sensor** that captures packets, and a Python package that runs the sensor and works with its output. The sensor's dependencies ([PcapPlusPlus](https://pcapplusplus.github.io/) and [fmt](https://fmt.dev/)) are installed automatically by [vcpkg](https://vcpkg.io/) the first time you build.
+
+Once the prerequisites below are installed, one command builds everything, gives the sensor permission to capture, and starts Wirewatch on any OS:
+
+```sh
+uv run scripts/dev.py
+```
 
 ### Linux / macOS
 
@@ -45,6 +51,12 @@ sudo apt install build-essential git cmake curl zip unzip tar pkg-config bison f
    brew install cmake pkgconf
    ```
 
+Then install [uv](https://docs.astral.sh/uv/getting-started/installation/), which manages Python and builds the package:
+
+```sh
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
 #### 2. Install vcpkg
 
 Skip this if you already have vcpkg.
@@ -66,27 +78,19 @@ echo 'export VCPKG_ROOT="$HOME/vcpkg"' >> ~/.bashrc   # most Linux distros
 
 Open a new terminal and check that `echo $VCPKG_ROOT` prints the path.
 
-#### 3. Build
+#### 3. Build and run
 
-From the `sensor/` directory:
-
-```sh
-cmake --preset default
-cmake --build build
-```
-
-The first configure takes a few minutes while vcpkg builds the dependencies. Later builds are cached.
-
-> **Linux:** after linking, the build runs `sudo setcap` so the sensor can capture packets without running as root, so it may ask for your password. To skip that step, configure with `cmake --preset default -DWIREWATCH_SETCAP=OFF` and run the sensor with `sudo` instead.
-
-#### 4. Run
+From the repository root:
 
 ```sh
-./build/bin/sensor            # list network interfaces
-./build/bin/sensor <iface>    # capture on an interface, e.g. eth0 or en0
+uv run scripts/dev.py
 ```
 
-> **macOS:** listing interfaces works as a normal user, but capturing needs access to `/dev/bpf*`, which only root has by default. Capture with `sudo ./build/bin/sensor en0`, or install Wireshark's ChmodBPF helper with `brew install --cask wireshark-chmodbpf` and restart your Mac to capture without `sudo`. The Wireshark app (`brew install --cask wireshark-app`) already includes the helper, so skip the separate cask if you install that.
+The first build takes a few minutes while vcpkg builds the dependencies. Later builds are cached.
+
+> **Linux:** the script runs `sudo setcap cap_net_raw,cap_net_admin=eip` on the sensor so it can capture without running as root, so it may ask for your password. Rebuilding the sensor removes these capabilities, so the script checks for them on every run.
+>
+> **macOS:** capturing needs access to `/dev/bpf*`, which only root has by default. Install Wireshark's ChmodBPF helper with `brew install --cask wireshark-chmodbpf` and restart your Mac. The Wireshark app (`brew install --cask wireshark-app`) already includes the helper, so skip the separate cask if you install that. The script stops with a message if it can't open `/dev/bpf0`.
 
 ### Windows
 
@@ -94,32 +98,49 @@ The first configure takes a few minutes while vcpkg builds the dependencies. Lat
 
 - [Visual Studio](https://visualstudio.microsoft.com/) 2022 or newer with the **Desktop development with C++** workload (this includes CMake and vcpkg)
 - [Npcap](https://npcap.com/#download), the packet capture driver. The default install options are fine.
+- [uv](https://docs.astral.sh/uv/getting-started/installation/): `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
 
-#### 2. Build
+#### 2. Build and run
 
-Open **Developer PowerShell for VS** from the Start menu. It already has `VCPKG_ROOT` set to the copy of vcpkg that ships with Visual Studio. From the `sensor/` directory:
+Open **Developer PowerShell for VS** from the Start menu. It already has `VCPKG_ROOT` set to the copy of vcpkg that ships with Visual Studio. From the repository root:
 
 ```powershell
-cmake --preset windows
-cmake --build --preset windows
+uv run scripts/dev.py
 ```
 
-The first configure takes a few minutes while vcpkg builds the dependencies. Later builds are cached.
+The first build takes a few minutes while vcpkg builds the dependencies. Later builds are cached.
 
 > Using your own vcpkg clone instead? Set a `VCPKG_ROOT` user environment variable pointing at it and you can build from any PowerShell window.
 
-#### 3. Run
+> **No interfaces listed?** Make sure Npcap is installed. If you installed it with *Restrict Npcap driver's access to Administrators only*, run from an administrator terminal.
 
-```powershell
-.\build\windows\bin\Debug\sensor.exe                  # list network interfaces
-.\build\windows\bin\Debug\sensor.exe "\Device\NPF_{...}"  # capture on an interface
+### Building the sensor on its own
+
+To work on the C++ sensor without the Python package, build it directly with CMake from the `sensor/` directory:
+
+```sh
+cmake --preset default            # Windows: cmake --preset windows
+cmake --build build               # Windows: cmake --build --preset windows
 ```
 
-Copy an interface name from the list. Keep the quotes, because PowerShell treats `{...}` as a script block and cuts the name off.
+Then run it with the interface to capture on, the maximum number of packets, and a timeout:
 
-> **No interfaces listed?** Make sure Npcap is installed. If you installed it with *Restrict Npcap driver's access to Administrators only*, run the sensor from an administrator terminal.
+```sh
+./build/bin/sensor <iface> <max_packets> <timeout>
+```
+
+> **Linux:** a plain CMake build runs `sudo setcap` on the sensor after linking, so it may ask for your password. If that fails, or you configured with `-DWIREWATCH_SETCAP=OFF`, grant it yourself after every build: `sudo setcap cap_net_raw,cap_net_admin=eip build/bin/sensor`.
 
 ---
+
+
+---
+
+## Development
+
+Don't run uv with sudo.
+
+Calling the C++ functions from python does not retain (or ever grant) the proper capture priviledges. 
 
 **Currently in development** 
 

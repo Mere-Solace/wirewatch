@@ -4,6 +4,7 @@ target_link_libraries(capture
 	PUBLIC 
 		core
 		PcapPlusPlus::Pcap++
+		nlohmann_json::nlohmann_json
 )
 
 target_sources(capture

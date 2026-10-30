@@ -1,0 +1,40 @@
+[build-system]
+requires = [
+    "scikit-build-core>=0.10",
+    "pybind11>=2.11",
+]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "wirewatch"
+version = "0.0.1"
+description = "Descriptive network health monitor"
+readme = "README.md"
+authors = [
+    { name = "mere-solace", email = "btm7428@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = []
+
+[project.scripts]
+wirewatch = "wirewatch:main"
+
+[tool.scikit-build]
+minimum-version = "build-system.requires"
+cmake.source-dir = "sensor"
+cmake.define.WIREWATCH_SETCAP = "OFF"
+build-dir = "build/{wheel_tag}"
+
+[dependency-groups]
+dev = [
+    "pybind11>=3.1.0",
+    "pybind11-stubgen>=3.0.0",
+]
+
+[tool.uv]
+cache-keys = [{ file = "sensor/**/*.cxx" }, { file = "sensor/**/*.hxx"}, { file = "sensor/CMakeLists.txt"}]
+
+[tool.basedpyright]
+reportMissingModuleSource = "none"
+reportAny = "none"
+
