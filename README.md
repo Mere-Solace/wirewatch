@@ -23,12 +23,27 @@ sudo apt install build-essential git cmake curl zip unzip tar pkg-config bison f
 
 > `bison` and `flex` are needed to build libpcap.
 
-**macOS** (with [Homebrew](https://brew.sh/)):
+**macOS:**
 
-```sh
-xcode-select --install
-brew install cmake pkg-config
-```
+1. Install Apple's Command Line Tools, which include clang, make, git, bison, and flex. A window pops up; let it finish before you continue. If the command says they're already installed, move on.
+
+   ```sh
+   xcode-select --install
+   ```
+
+2. Install [Homebrew](https://brew.sh/) if `brew --version` doesn't work yet:
+
+   ```sh
+   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+   ```
+
+   When it finishes, run the commands it prints under **Next steps**. They put `brew` on your PATH, since Homebrew installs to `/opt/homebrew` and macOS doesn't look there by default. The installer only supports Apple Silicon Macs. On an Intel Mac, get CMake and pkg-config another way, such as [MacPorts](https://www.macports.org/).
+
+3. Install CMake and pkg-config (Homebrew calls it `pkgconf`):
+
+   ```sh
+   brew install cmake pkgconf
+   ```
 
 #### 2. Install vcpkg
 
@@ -39,11 +54,17 @@ git clone https://github.com/microsoft/vcpkg ~/vcpkg
 ~/vcpkg/bootstrap-vcpkg.sh -disableMetrics
 ```
 
-Then tell CMake where it is by adding this line to your shell config (`~/.bashrc` on most Linux distros, `~/.zshrc` on macOS) and opening a new terminal:
+Then tell CMake where it is by adding `VCPKG_ROOT` to your shell config. Run the line for your OS:
 
 ```sh
-export VCPKG_ROOT="$HOME/vcpkg"
+echo 'export VCPKG_ROOT="$HOME/vcpkg"' >> ~/.zshrc    # macOS (zsh is the default shell)
 ```
+
+```sh
+echo 'export VCPKG_ROOT="$HOME/vcpkg"' >> ~/.bashrc   # most Linux distros
+```
+
+Open a new terminal and check that `echo $VCPKG_ROOT` prints the path.
 
 #### 3. Build
 
@@ -65,7 +86,7 @@ The first configure takes a few minutes while vcpkg builds the dependencies. Lat
 ./build/bin/sensor <iface>    # capture on an interface, e.g. eth0 or en0
 ```
 
-> **macOS:** capturing requires access to `/dev/bpf*`. Run the sensor with `sudo`, or install Wireshark's *ChmodBPF* helper to capture as a regular user.
+> **macOS:** listing interfaces works as a normal user, but capturing needs access to `/dev/bpf*`, which only root has by default. Capture with `sudo ./build/bin/sensor en0`, or install Wireshark's ChmodBPF helper with `brew install --cask wireshark-chmodbpf` and restart your Mac to capture without `sudo`. The Wireshark app (`brew install --cask wireshark-app`) already includes the helper, so skip the separate cask if you install that.
 
 ### Windows
 
