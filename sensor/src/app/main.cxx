@@ -1,6 +1,5 @@
 #include <cstdlib>
 #include <iostream>
-#include <csignal>
 #include <pcapplusplus/PcapLiveDeviceList.h>
 // =========================================
 // This implementation uses Pcap++.
