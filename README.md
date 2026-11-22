@@ -21,7 +21,7 @@ uv run scripts/dev.py
 
 #### 1. Install the build tools
 
-**Linux** (Debian/Ubuntu — use your distro's equivalents elsewhere):
+**Linux** (Debian/Ubuntu - use your distro's equivalents elsewhere):
 
 ```sh
 sudo apt install build-essential git cmake curl zip unzip tar pkg-config bison flex
@@ -51,11 +51,7 @@ sudo apt install build-essential git cmake curl zip unzip tar pkg-config bison f
    brew install cmake pkgconf
    ```
 
-Then install [uv](https://docs.astral.sh/uv/getting-started/installation/), which manages Python and builds the package:
-
-```sh
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
+Then install [uv](https://docs.astral.sh/uv/getting-started/installation/), which manages Python and builds the package.
 
 #### 2. Install vcpkg
 
@@ -141,6 +137,19 @@ Then run it with the interface to capture on, the maximum number of packets, and
 Don't run uv with sudo.
 
 Calling the C++ functions from python does not retain (or ever grant) the proper capture priviledges. 
+
+### Adding Python dependencies
+
+The project uses [uv](https://docs.astral.sh/uv/) with `pyproject.toml`, not `requirements.txt`. Add packages with `uv add` instead of editing `pyproject.toml` by hand, so `uv.lock` is updated in the same step:
+
+```sh
+uv add <package>          # runtime dependency: anything wirewatch imports when it runs
+uv add --dev <package>    # dev-only tool: stub generators, linters, test runners
+```
+
+Commit both `pyproject.toml` and `uv.lock`. Everyone else then runs `uv sync` to get the same versions.
+
+Don't add app dependencies to `[build-system].requires`. That list is only for building the C++ sensor extension (`scikit-build-core`, `pybind11`).
 
 **Currently in development** 
 
