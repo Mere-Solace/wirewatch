@@ -63,6 +63,7 @@ namespace wirewatch {
 				jsonObject["tv_nsec"] = raw->getPacketTimeStamp().tv_nsec;
 			
 				std::cout << jsonObject.dump() << std::endl;
+				std::cout.flush();
 
 				return count >= maxPackets;
 	 		},
