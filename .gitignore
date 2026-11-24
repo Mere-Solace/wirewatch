@@ -100,7 +100,7 @@ captures/
 
 # ===== project =====
 notes/
-CLAUDE.md
+CLAUDE.local.md
 .claude/
 
 # ===== node =====
