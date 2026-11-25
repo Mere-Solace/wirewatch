@@ -6,7 +6,7 @@
 <p>Placeholder page: shows the raw /api/state JSON.</p>
 <pre id="state">waiting for /api/state</pre>
 <script>
-// shortcut: polls once a second; switch to Server-Sent Events if that lag shows in the demo
+// Placeholder until Juan's page replaces it. Asks the server for new data once a second.
 async function refresh() {
   const response = await fetch("/api/state");
   document.getElementById("state").textContent = JSON.stringify(await response.json(), null, 2);
