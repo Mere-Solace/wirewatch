@@ -8,8 +8,8 @@ from wirewatch.backend import Packet, capture_packets, list_devices
 from wirewatch.frontend import server
 from wirewatch.records import Alert
 
-# Each detector's process method. Add a rule here once the records it reads exist.
-# shortcut: empty until the sensor emits ports and TCP flags (PortScanRule needs dst_port and flags)
+# Every packet goes to each detector's process method. Empty for now: the port scan rule
+# needs dst_port and flags, and the sensor doesn't send those yet.
 DETECTORS: list[Callable[[Packet], list[Alert]]] = []
 NO_PACKET_LIMIT = 2**31 - 1
 
@@ -23,8 +23,8 @@ def main() -> None:
 	names = [name for name, _ in list_devices()]
 	if not names:
 		sys.exit("No capture interfaces found. On Windows install Npcap; elsewhere check capture permission (see README).")
-	# macOS lists idle interfaces like ap1 before en0, its primary interface.
-	# shortcut: name-based default; pick by IPv4 address once list_devices returns addresses
+	# On macOS the first interface listed is usually an idle one like ap1, so default to en0 (Wi-Fi).
+	# Picking the interface that has an IP address would be better once list_devices returns addresses.
 	default = "en0" if sys.platform == "darwin" and "en0" in names else names[0]
 	interface: str = args.interface or default
 	if interface not in names:
@@ -34,7 +34,7 @@ def main() -> None:
 	print(f"Capturing on {interface}. Dashboard: http://127.0.0.1:{dashboard.server_port} (Ctrl+C to stop)", flush=True)
 
 	try:
-		# timeout 0 means none in PcapPlusPlus; the packet limit is the largest C int, since the sensor stops when count >= limit
+		# A timeout of 0 means no timeout. The sensor stops once it hits the packet limit, so pass the largest C int.
 		for packet in capture_packets(interface, NO_PACKET_LIMIT, 0):
 			server.add_packet(packet)
 			for detect in DETECTORS:
