@@ -20,8 +20,11 @@ def scan(host, ports, delay):
     Each attempt sends a SYN, which is what detector.py counts. Nothing needs to be
     listening: a closed port answers with RST, but the SYN was already on the wire.
     """
-    # TODO(Kai): loop over ports, try a connection to (host, port), clean up, then wait.
-    raise NotImplementedError
+    for port in ports:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.settimeout(0.5)
+            sock.connect_ex((host, port))  # returns an error code on a closed port instead of raising
+        time.sleep(delay)
 
 
 def main():
@@ -33,7 +36,7 @@ def main():
     if args.case == "scan":
         scan(args.host, range(1, 31), delay=0.05)
     elif args.case == "slow":
-        scan(args.host, range(1, 31), delay=0.0)  # TODO(Kai): pick a delay that stays under the detector's threshold
+        scan(args.host, range(1, 31), delay=0.6)  # 0.6 s apart: at most 9 ports in any 5 s window, under the threshold of 10
     else:
         scan(args.host, [23], delay=0)
     print(f"sent {args.case} traffic to {args.host}")

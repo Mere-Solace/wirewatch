@@ -15,4 +15,4 @@ python3 detector.py -r capture.pcap        # replay a saved capture
 python3 detector.py -i en0 --canary 23,2323
 ```
 
-`traffic.py` sends test traffic to localhost (`scan`, `slow`, `canary`) for the screenshots in the report. Its `scan()` function is not written yet.
+`traffic.py` sends test traffic to localhost (`scan`, `slow`, `canary`) for the screenshots in the report.
