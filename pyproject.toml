@@ -27,8 +27,10 @@ build-dir = "build/{wheel_tag}"
 
 [dependency-groups]
 dev = [
+    "basedpyright>=1.40.2",
     "pybind11>=3.1.0",
     "pybind11-stubgen>=3.0.0",
+    "pytest>=9.2.0",
 ]
 
 [tool.uv]
