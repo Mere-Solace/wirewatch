@@ -1,5 +1,6 @@
 import importlib
 import json
+import socket
 from collections.abc import Iterator
 from types import ModuleType
 from typing import cast
@@ -14,25 +15,28 @@ from wirewatch.records import Alert, Conversation, Health
 
 def make_alert(ts: float = 100.0) -> Alert:
 	return {
+		"type": "alert",
+		"v": 1,
 		"ts": ts,
-		"type": "port_scan",
-		"severity": "Medium",
+		"severity": "MEDIUM",
+		"rule": "port_scan",
 		"device": "192.168.1.50",
 		"title": "Port scan detected",
-		"what_happened": "192.168.1.50 tried 214 different ports on 192.168.1.20 within 10 seconds.",
-		"why_this_severity": "Trying many ports quickly is typical of a tool searching for open services.",
-		"next_step": "Check whether you recognize this device. If not, disconnect it from the network.",
+		"what": "192.168.1.50 tried 214 different ports on 192.168.1.20 within 10 seconds.",
+		"why": "Trying many ports quickly is typical of a tool searching for open services.",
+		"next": "Check whether you recognize this device. If not, disconnect it from the network.",
+		"flow_ids": [],
 		"evidence": {"ports": 214, "seconds": 10, "target": "192.168.1.20"},
 	}
 
 
 def make_health() -> Health:
-	return {"ts": 100.0, "score": 82, "cause": "DNS lookups are failing more than usual.",
-	        "handshake_ms": 24.5, "retransmissions": 3, "dns_failures": 7}
+	return {"type": "health", "v": 1, "ts": 100.0, "score": 82, "cause": "DNS lookups are failing more than usual.",
+	        "segments": [], "handshake_rtt_ms": 24.5, "retransmissions": 3, "dns_failures": 7}
 
 
 def make_conversation() -> Conversation:
-	return {"device": "192.168.1.20", "maker": "Apple", "name": "www.google.com",
+	return {"type": "conversation", "v": 1, "device": "192.168.1.20", "maker": "Apple", "name": "www.google.com",
 	        "proto": "tcp", "bytes": 51200, "packets": 64}
 
 
@@ -84,3 +88,16 @@ def test_page_and_unknown_path(server: tuple[ModuleType, str]) -> None:
 	with pytest.raises(HTTPError) as error:
 		_ = urlopen(f"{url}/nope")
 	assert error.value.code == 404
+
+
+def test_default_port_falls_back_when_taken(monkeypatch: pytest.MonkeyPatch) -> None:
+	with socket.socket() as taken:
+		taken.bind(("127.0.0.1", 0))
+		taken.listen()
+		monkeypatch.setattr(server_module, "DEFAULT_PORT", taken.getsockname()[1])
+
+		http = server_module.serve()
+		try:
+			assert http.server_port != server_module.DEFAULT_PORT
+		finally:
+			http.shutdown()

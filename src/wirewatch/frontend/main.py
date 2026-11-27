@@ -17,7 +17,7 @@ NO_PACKET_LIMIT = 2**31 - 1
 def main() -> None:
 	parser = argparse.ArgumentParser(description="Wirewatch network health monitor.")
 	_ = parser.add_argument("-i", "--interface", help="interface to capture on (default: the first one listed)")
-	_ = parser.add_argument("--port", type=int, default=8000, help="dashboard port on 127.0.0.1 (default 8000)")
+	_ = parser.add_argument("--port", type=int, help="dashboard port on 127.0.0.1 (default: 8000, or a free port if 8000 is taken)")
 	args = parser.parse_args()
 
 	names = [name for name, _ in list_devices()]

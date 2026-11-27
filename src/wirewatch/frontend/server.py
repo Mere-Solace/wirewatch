@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 	from wirewatch.backend import Packet
 
 STATIC = Path(__file__).parent / "static"
+DEFAULT_PORT = 8000
 RECENT = 500  # packets and alerts kept for the page; older ones drop off
 
 _lock = threading.Lock()
@@ -77,10 +78,20 @@ class _Handler(BaseHTTPRequestHandler):
 		pass  # the page polls every second, which would flood the terminal
 
 
-def serve(port: int = 8000) -> ThreadingHTTPServer:
-	"""Start the dashboard in a background thread and return the server (port 0 picks a free port)."""
+def serve(port: int | None = None) -> ThreadingHTTPServer:
+	"""Start the dashboard in a background thread and return the server.
+
+	port None tries DEFAULT_PORT and falls back to a free port if it is taken; 0 always picks a free port.
+	An explicit port that is taken raises OSError.
+	"""
 	# 127.0.0.1 only, so captured traffic is never reachable from the rest of the network
-	server = ThreadingHTTPServer(("127.0.0.1", port), _Handler)
+	if port is None:
+		try:
+			server = ThreadingHTTPServer(("127.0.0.1", DEFAULT_PORT), _Handler)
+		except OSError:
+			server = ThreadingHTTPServer(("127.0.0.1", 0), _Handler)
+	else:
+		server = ThreadingHTTPServer(("127.0.0.1", port), _Handler)
 	threading.Thread(target=server.serve_forever, daemon=True).start()
 	return server
 
