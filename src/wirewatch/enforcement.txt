@@ -1,0 +1,68 @@
+WIREWATCH PYTHON ENFORCEMENT RULES
+MUST is blocking. SHOULD is a strong default; deviating requires a stated reason.
+Applies to src/wirewatch/, tests/, and scripts/. Does not apply to honors/, which is kept separate by contract.
+
+LANGUAGE AND TOOLING
+- MUST target the Python version in .python-version and pyproject.toml (requires-python); no compatibility shims for older versions.
+- MUST annotate every function parameter and return type, including -> None.
+- MUST stay clean under basedpyright with the pyproject.toml config; a suppression is # pyright: ignore[rule] -- reason, on that line.
+- MUST discard an unused call result explicitly with _ = call(), as the existing code does.
+- MUST indent with tabs, matching the existing package and scripts.
+- MUST keep every file formatted exactly as the pinned formatter writes it, and clean under the pinned linter, once those are added to pyproject.toml.
+- MUST use US English spelling in identifiers, comments, docs, and log strings.
+- MUST name modules, functions, and variables snake_case, classes PascalCase, and module constants UPPER_SNAKE_CASE.
+- MUST put the unit in the name of any constant or field with a unit: WINDOW_SECONDS, handshake_ms, frame_len (bytes is implied only for *_len and bytes).
+- SHOULD prefer the standard library; a new third-party dependency MUST be added with uv add and justified in the PR.
+
+RECORDS AND THE PIPELINE CONTRACT
+- Every record that moves between modules (packet, flow, stats, dns, health, alert) MUST be a TypedDict or dataclass defined in exactly one module, and every other module imports it from there.
+- MUST NOT pass an untyped dict between modules, and MUST NOT redeclare a record shape locally.
+- MUST use the same key for the same concept everywhere: one name for source address, one for timestamp, one for severity. Check the shared record module before inventing a key.
+- Timestamps MUST be epoch seconds as float, named ts, taken from the record (packet time), never from the wall clock inside analysis.
+- Severity MUST come from the single shared Literal or Enum; no string spellings invented per module.
+- An alert MUST carry what happened, why it got its severity, and what the user should do next, in plain language.
+
+WIRE TYPES STAY IN SYNC
+- A value that crosses the sensor-to-Python boundary is mirrored in a chain: the C++ emitter, the schema in schemas/, the Python record type, and the parser.
+- MUST add a new field to EVERY mirror in that chain in the same PR.
+- MUST cover every wire record with a round-trip test that sets every field to a distinct non-default value.
+- MUST validate sensor output at the parse boundary: a malformed line is logged and dropped, never crashes the app.
+
+LAYERS AND IMPORTS
+- MUST respect the import direction frontend -> analysis -> records, and frontend -> backend -> records. A lower layer never imports a higher one.
+- analysis/ MUST NOT import backend/ at runtime, so analysis tests run without the compiled extension; type-only imports go under if TYPE_CHECKING.
+- MUST NOT create import cycles; break them by moving the shared type down into the records module.
+- Entry points (main.py, scripts) are switching fabric only and MUST NOT define record types, rules, or algorithms.
+
+ANALYSIS AND DETECTION
+- A detector or metric MUST be a class with one public method that takes one record and returns a list of results (empty when nothing happened).
+- MUST keep detector and metric logic free of I/O, printing, sleeping, and clock reads; state lives on the instance.
+- MUST give each detector its own module named for what it detects; shared helpers (windows, counters) live in their own module.
+- MUST make thresholds module constants with a comment saying where the value came from, or that it is a starting guess.
+- Python MUST NOT process every packet at line rate; per-packet work belongs in the sensor, and Python consumes flows, stats, and sampled packets.
+
+ERROR HANDLING AND OUTPUT
+- MUST NOT use a bare except or except Exception without re-raising or logging the cause.
+- Every error message MUST state what happened, why, and what to do next.
+- Library code MUST log through logging.getLogger(__name__) and MUST NOT print; print belongs to entry points and scripts only.
+- MUST NOT use assert for runtime validation; asserts are for tests and type narrowing.
+
+TESTS
+- MUST use pytest, with tests in tests/ named test_<module>.py.
+- MUST test every detector with a case that fires, a case that stays quiet, and a dedup or cooldown case.
+- MUST build test records with shared helper functions, not hand-written dict literals repeated per test.
+- A test MUST NOT need live capture, root, the network, or the compiled extension unless it is marked and skipped loudly when unavailable.
+
+FILE SHAPE
+- MUST give each module one responsibility and name it for what it holds.
+- A module crossing 400 lines MUST be flagged in review and MUST NOT grow without a reason in the PR.
+- A new subsystem MUST arrive as its own module, never appended to an existing one for later extraction.
+- A docstring states the contract (inputs, units, return, side effects), not a restatement of the signature or the history.
+
+A FEATURE REACHES THE RUNNING APP
+- A feature is not done until it runs from uv run scripts/dev.py, not only from tests.
+- MUST state in the PR exactly how to reach the feature.
+
+BEFORE A COMMIT
+- basedpyright, the linter, the formatter check, and pytest all pass.
+- After any rename or move, grep for the old name across code, comments, docs, and tests and expect zero hits.

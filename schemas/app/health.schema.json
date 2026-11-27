@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Mere-Solace/wirewatch/schemas/app/health.schema.json",
+  "title": "health",
+  "description": "Current network health: a score, the sentence explaining it, and the status of each segment from this computer out to DNS. segments lists only the segments that apply; wifi is absent on a wired connection.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "v", "ts", "score", "cause", "segments", "handshake_rtt_ms", "retransmissions", "dns_failures"],
+  "properties": {
+    "type": { "const": "health" },
+    "v": { "const": 1 },
+    "ts": { "type": "number", "description": "Epoch seconds." },
+    "score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "cause": { "type": "string", "description": "One sentence naming the worst segment and the evidence for it." },
+    "segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "status", "rtt_ms", "loss_pct"],
+        "properties": {
+          "name": { "enum": ["this_pc", "wifi", "router", "internet", "dns"] },
+          "status": { "enum": ["ok", "degraded", "bad"] },
+          "rtt_ms": { "type": ["number", "null"], "minimum": 0, "description": "null when not probed yet." },
+          "loss_pct": { "type": ["number", "null"], "minimum": 0, "maximum": 100, "description": "null when not probed yet." }
+        }
+      }
+    },
+    "handshake_rtt_ms": { "type": ["number", "null"], "minimum": 0, "description": "Recent median TCP handshake RTT; null when no handshakes were seen." },
+    "retransmissions": { "type": "integer", "minimum": 0, "description": "Over the scoring window." },
+    "dns_failures": { "type": "integer", "minimum": 0, "description": "Over the scoring window." }
+  }
+}

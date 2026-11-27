@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Mere-Solace/wirewatch/schemas/app/alert.schema.json",
+  "title": "alert",
+  "description": "One detection, written in plain language for someone who is not a network expert. Repeats from the same rule and device within a cooldown update one alert instead of adding another.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "v", "ts", "severity", "rule", "device", "title", "what", "why", "next", "flow_ids", "evidence"],
+  "properties": {
+    "type": { "const": "alert" },
+    "v": { "const": 1 },
+    "ts": { "type": "number", "description": "Time of the triggering record, epoch seconds." },
+    "severity": { "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"] },
+    "rule": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$", "description": "Detector name, e.g. \"port_scan\", \"arp_spoof\"." },
+    "device": { "type": "string", "description": "IP address the alert is about." },
+    "title": { "type": "string", "description": "A few words, for a list or popup heading." },
+    "what": { "type": "string", "description": "What happened, one sentence." },
+    "why": { "type": "string", "description": "Why it got this severity." },
+    "next": { "type": "string", "description": "What the user should do." },
+    "flow_ids": { "type": "array", "items": { "type": "string" }, "description": "flow_id of each flow record used as evidence; may be empty." },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": { "type": ["string", "number", "boolean"] },
+      "description": "Rule-specific numbers behind the alert, e.g. {\"ports\": 214, \"window_seconds\": 5}."
+    }
+  }
+}

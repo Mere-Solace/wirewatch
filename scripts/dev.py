@@ -49,10 +49,15 @@ def build() -> None:
 
 
 def find_sensor() -> Path:
-	name = "sensor.exe" if sys.platform == "win32" else "sensor"
-	candidates = list((REPO / "build").glob(f"*/bin/{name}"))
+	if sys.platform == "win32":
+		sensor = REPO / "sensor" / "build" / "bin" / "Debug" / "sensor.exe"
+		if not sensor.is_file():
+			fail(f"sensor executable not found: {sensor}")
+		return sensor.resolve()
+
+	candidates = list((REPO / "build").glob(f"*/bin/sensor"))
 	if not candidates:
-		fail(f"no {name} under build/*/bin after building")
+		fail(f"no sensor under build/*/bin after building")
 	# several wheel-tag dirs can exist (e.g. after a Python upgrade); take the newest
 	return max(candidates, key=lambda p: p.stat().st_mtime)
 

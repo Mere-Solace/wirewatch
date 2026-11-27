@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Mere-Solace/wirewatch/schemas/wire/flow.schema.json",
+  "title": "flow",
+  "description": "One bidirectional flow, emitted once when it ends. The originator (orig) is the side that sent the first packet; src_* is the originator.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type", "v", "flow_id", "ts", "ts_end", "src_ip", "dst_ip", "proto", "src_port", "dst_port",
+    "orig_bytes", "orig_packets", "resp_bytes", "resp_packets",
+    "handshake_rtt_ms", "retransmissions", "resets", "end_reason"
+  ],
+  "properties": {
+    "type": { "const": "flow" },
+    "v": { "const": 1 },
+    "flow_id": { "type": "string", "description": "Unique within one sensor run. Alerts cite it as evidence." },
+    "ts": { "type": "number", "description": "First packet time, epoch seconds." },
+    "ts_end": { "type": "number", "description": "Last packet time, epoch seconds; at least ts." },
+    "src_ip": { "type": "string" },
+    "dst_ip": { "type": "string" },
+    "proto": { "enum": ["tcp", "udp", "icmp", "icmpv6", "other"] },
+    "src_port": { "type": ["integer", "null"], "minimum": 0, "maximum": 65535 },
+    "dst_port": { "type": ["integer", "null"], "minimum": 0, "maximum": 65535 },
+    "orig_bytes": { "type": "integer", "minimum": 0 },
+    "orig_packets": { "type": "integer", "minimum": 0 },
+    "resp_bytes": { "type": "integer", "minimum": 0 },
+    "resp_packets": { "type": "integer", "minimum": 0 },
+    "handshake_rtt_ms": { "type": ["number", "null"], "minimum": 0, "description": "SYN to SYN-ACK. null when not tcp or no handshake was seen." },
+    "retransmissions": { "type": "integer", "minimum": 0 },
+    "resets": { "type": "integer", "minimum": 0 },
+    "end_reason": { "enum": ["fin", "rst", "idle", "active", "shutdown"], "description": "active: hit the maximum flow age. shutdown: flushed when the sensor stopped." }
+  }
+}

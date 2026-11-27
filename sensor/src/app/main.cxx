@@ -1,6 +1,5 @@
 #include <cstdlib>
 #include <iostream>
-#include <csignal>
 #include <pcapplusplus/PcapLiveDeviceList.h>
 // =========================================
 // This implementation uses Pcap++.
@@ -28,14 +27,6 @@ static bool loadNpcap() {
 }
 #endif
 
-// expection to the global variable avoidance rule - used for interruption.
-volatile std::sig_atomic_t stop{0};
-
-extern "C" void handler(int signal){
-  (void)signal;
-  stop = 1;
-}
-
 // Command Line arguments: 
 // $ sensor <device_name> <max_packets> <timeout_milliseconds>
 //  
@@ -59,13 +50,6 @@ int main(int argc, char *argv[]) {
   std::cerr << "blocking capture has begun." << std::endl;
 
   wirewatch::capturePackets(devName, maxPackets, timeoutSeconds);
-
-
-  struct sigaction sigIntAction{};
-  sigIntAction.sa_handler = handler;
-  sigemptyset(&sigIntAction.sa_mask);
-  sigIntAction.sa_flags = 0;
-  sigaction(SIGINT, &sigIntAction, nullptr);
 
   return 0;
 }

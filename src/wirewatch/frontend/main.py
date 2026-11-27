@@ -8,7 +8,11 @@ if __name__ == "__main__":
 
 	print("\n| capture_packets:\n\n")
 
+	count = 0
+
 	for packet in capture_packets(devices[0][0], 100, 60):
-		print(packet)
+		count += 1
+		if count > 100: 
+			break
 
 	

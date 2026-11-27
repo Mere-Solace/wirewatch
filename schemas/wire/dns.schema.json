@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Mere-Solace/wirewatch/schemas/wire/dns.schema.json",
+  "title": "dns",
+  "description": "One DNS query matched to its response by transaction ID, or emitted unanswered after a timeout.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "v", "ts", "client_ip", "server_ip", "txid", "qname", "qtype", "rcode", "answers", "response_ms"],
+  "properties": {
+    "type": { "const": "dns" },
+    "v": { "const": 1 },
+    "ts": { "type": "number", "description": "Query time, epoch seconds." },
+    "client_ip": { "type": "string" },
+    "server_ip": { "type": "string" },
+    "txid": { "type": "integer", "minimum": 0, "maximum": 65535 },
+    "qname": { "type": "string", "description": "Queried name without the trailing dot." },
+    "qtype": { "type": "string", "description": "Record type name, e.g. \"A\", \"AAAA\", \"HTTPS\"." },
+    "rcode": { "type": ["string", "null"], "description": "Response code name, e.g. \"NOERROR\", \"NXDOMAIN\". null when unanswered." },
+    "answers": { "type": "array", "items": { "type": "string" }, "description": "Answer data as text; empty when unanswered or no answers." },
+    "response_ms": { "type": ["number", "null"], "minimum": 0, "description": "null when unanswered." }
+  }
+}
