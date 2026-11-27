@@ -157,6 +157,17 @@ Don't add app dependencies to `[build-system].requires`. That list is only for b
 
 >Initialized for CS4622 (Computer Networks) at Kennesaw State University.
 
+
+## Setup + Usage
+IF WORKING IN GOOGLE COLAB:
+!git clone https://github.com
+%cd your-repo
+!pip install -r requirements.txt
+
+IF WORKING LOCALLY:
+git pull
+pip install -r requirements.txt
+
 ### Team:
 
 **Capture & Metrics:**
