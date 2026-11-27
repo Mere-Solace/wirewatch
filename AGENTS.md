@@ -25,7 +25,7 @@ If a rule blocks the task, say so to the user. Do not work around it or weaken i
 
 ```
 sensor (C++ subprocess, needs capture privileges)
-  └─ NDJSON on stdout: packets now; flows, stats, dns planned
+  └─ NDJSON on stdout: packets now; flows, stats, dns, arp planned
        └─ wirewatch.backend.capture_packets()  (Python generator, one record per line)
             └─ analysis/: metrics and detectors, pure functions of the records
                  └─ frontend/: local dashboard
@@ -38,7 +38,8 @@ sensor (C++ subprocess, needs capture privileges)
 
 Records that cross a boundary (sensor → Python, module → module) are defined once and imported everywhere else.
 
-- Today the only record on `dev` is `Packet` in `src/wirewatch/backend/__init__.py`.
+- Schemas in `schemas/` are the source of truth, `src/wirewatch/records.py` mirrors them in Python, and `docs/design/records.md` explains the conventions.
+- `backend/__init__.py` still has its own `Packet` matching what the sensor emits today. It goes away once the sensor emits the new `packet` record.
 - **Do not invent a new record shape or rename keys in a feature PR.** If you need a field that doesn't exist, tell the user. The change goes to the C++ emitter, `schemas/`, the Python type, and the parser together (see "Wire types stay in sync" in both rules files).
 
 ## Where things go
@@ -71,4 +72,33 @@ Sensor only: see "Building the sensor on its own" in `README.md`. Never run `uv`
 - It runs from `uv run scripts/dev.py`, not only from a test.
 - Tests and checks from the relevant rules file pass.
 - The PR says what it changes, how to reach it in the running app, and whether any record type changed.
+
+## Git and GitHub
+
+### Branches
+
+- Name branches `<type>/<topic>`: `feat/`, `fix/`, `ref/`, `docs/`, `chore/`, then a few lowercase words joined by hyphens that name the change, e.g. `feat/flow-records`, `fix/dns-timeout`. Not a person's name, not a team name.
+- One branch is one change. If a second, unrelated change comes up, it gets its own branch.
+- Branch from an up-to-date `main` (`git fetch origin && git switch -c <branch> origin/main`).
+- If you truly need someone's unmerged work, branch from their branch, not from `dev` or another catch-all, and put `Depends on #NN` at the top of the PR. Rebase onto `main` once that PR merges.
+- No long-lived branches. A branch older than about a week should be merged, split, or closed.
+- Delete a branch once its PR merges.
+
+### Commits
+
+- Message: `<type>: <what changed>`, lowercase, imperative, no trailing period. Types are `add`, `fix`, `ref`, `docs`, `chore`. Example: `fix: flush cout in capture.cxx`.
+- Keep unrelated changes in separate commits, and don't mix formatting with logic.
+- Never commit build output, `.venv/`, captures with real traffic, or secrets.
+
+### Pull requests
+
 - PRs target `main` and are small enough to review in one sitting. Never push to `main` directly.
+- Open a draft PR early if others will build on your work, so it shows up in `gh pr list`.
+- A record type change goes in its own PR, before the feature that uses it (see "Record types are a contract").
+- Keep the PR current by rebasing onto `main`. Resolve conflicts on your own branch, never in someone else's.
+
+### Other people's branches
+
+- Never push to, rebase, or force-push a branch you didn't create. To suggest a change, comment on the PR or open a PR into their branch.
+- `git push --force-with-lease` is fine on your own branch. Never use plain `--force`.
+- Agents: never push, open, merge, or close a PR, or delete a branch, without the user asking for that specific action.

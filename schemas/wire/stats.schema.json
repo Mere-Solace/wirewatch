@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Mere-Solace/wirewatch/schemas/wire/stats.schema.json",
+  "title": "stats",
+  "description": "Sensor counters for one interval, emitted about once a second. Counts are for the interval, not running totals.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "v", "ts", "interval_seconds", "packets", "bytes", "drops_kernel", "drops_interface", "decode_errors", "sampled_out"],
+  "properties": {
+    "type": { "const": "stats" },
+    "v": { "const": 1 },
+    "ts": { "type": "number", "description": "End of the interval, epoch seconds." },
+    "interval_seconds": { "type": "number", "exclusiveMinimum": 0 },
+    "packets": { "type": "integer", "minimum": 0 },
+    "bytes": { "type": "integer", "minimum": 0, "description": "Sum of frame_len." },
+    "drops_kernel": { "type": "integer", "minimum": 0, "description": "pcap_stats ps_drop for the interval." },
+    "drops_interface": { "type": "integer", "minimum": 0, "description": "pcap_stats ps_ifdrop for the interval; 0 where the platform does not report it." },
+    "decode_errors": { "type": "integer", "minimum": 0 },
+    "sampled_out": { "type": "integer", "minimum": 0, "description": "Packets counted but not emitted as packet records." }
+  }
+}

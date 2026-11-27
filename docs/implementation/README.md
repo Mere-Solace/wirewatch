@@ -1,3 +1,5 @@
-Actualized implementation docs and details for the system.
+# Implementation
 
-Milestone: [Implementation](https://github.com/Mere-Solace/wirewatch/milestone/3)
+Docs on how the system is actually implemented.
+
+- Milestone: [Implementation](https://github.com/Mere-Solace/wirewatch/milestone/3)

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Mere-Solace/wirewatch/schemas/wire/arp.schema.json",
+  "title": "arp",
+  "description": "One ARP request or reply. Every ARP packet is emitted, unsampled; the rate is low and detectors need each IP-to-MAC binding.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "v", "ts", "op", "sender_mac", "sender_ip", "target_mac", "target_ip"],
+  "properties": {
+    "type": { "const": "arp" },
+    "v": { "const": 1 },
+    "ts": { "type": "number", "description": "Capture time, epoch seconds." },
+    "op": { "enum": ["request", "reply"] },
+    "sender_mac": { "type": "string", "pattern": "^([0-9a-f]{2}:){5}[0-9a-f]{2}$", "description": "Lowercase, colon-separated." },
+    "sender_ip": { "type": "string" },
+    "target_mac": { "type": "string", "pattern": "^([0-9a-f]{2}:){5}[0-9a-f]{2}$", "description": "00:00:00:00:00:00 in a request." },
+    "target_ip": { "type": "string" }
+  }
+}

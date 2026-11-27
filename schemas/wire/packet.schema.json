@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Mere-Solace/wirewatch/schemas/wire/packet.schema.json",
+  "title": "packet",
+  "description": "Summary of one captured packet. The sensor emits a rate-limited sample, not every packet.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "v", "ts", "src_ip", "dst_ip", "proto", "src_port", "dst_port", "tcp_flags", "frame_len", "cap_len"],
+  "properties": {
+    "type": { "const": "packet" },
+    "v": { "const": 1 },
+    "ts": { "type": "number", "description": "Capture time, epoch seconds." },
+    "src_ip": { "type": "string", "description": "IPv4 or IPv6 address, as text." },
+    "dst_ip": { "type": "string", "description": "IPv4 or IPv6 address, as text." },
+    "proto": { "enum": ["tcp", "udp", "icmp", "icmpv6", "other"] },
+    "src_port": { "type": ["integer", "null"], "minimum": 0, "maximum": 65535, "description": "null when proto has no ports." },
+    "dst_port": { "type": ["integer", "null"], "minimum": 0, "maximum": 65535, "description": "null when proto has no ports." },
+    "tcp_flags": {
+      "type": ["string", "null"],
+      "pattern": "^F?S?R?P?A?U?E?C?$",
+      "description": "Set TCP flags as letters in the order FSRPAUEC, e.g. \"S\" for SYN, \"SA\" for SYN-ACK. null when proto is not tcp."
+    },
+    "frame_len": { "type": "integer", "minimum": 0, "description": "Bytes on the wire." },
+    "cap_len": { "type": "integer", "minimum": 0, "description": "Bytes captured; at most frame_len." }
+  }
+}

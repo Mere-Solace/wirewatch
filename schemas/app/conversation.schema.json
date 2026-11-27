@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Mere-Solace/wirewatch/schemas/app/conversation.schema.json",
+  "title": "conversation",
+  "description": "Traffic between one local device and one remote name, summed over the flows between them.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "v", "device", "maker", "name", "proto", "bytes", "packets"],
+  "properties": {
+    "type": { "const": "conversation" },
+    "v": { "const": 1 },
+    "device": { "type": "string", "description": "Local IP address." },
+    "maker": { "type": "string", "description": "Vendor from the MAC address; empty when unknown." },
+    "name": { "type": "string", "description": "Remote name from DNS or TLS SNI, else the remote IP." },
+    "proto": { "enum": ["tcp", "udp", "icmp", "icmpv6", "other"] },
+    "bytes": { "type": "integer", "minimum": 0, "description": "Both directions." },
+    "packets": { "type": "integer", "minimum": 0, "description": "Both directions." }
+  }
+}

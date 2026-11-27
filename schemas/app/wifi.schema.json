@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Mere-Solace/wirewatch/schemas/app/wifi.schema.json",
+  "title": "wifi",
+  "description": "One reading of the Wi-Fi link from the OS (iw/nmcli, CoreWLAN, netsh). A field the platform does not report is null.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "v", "ts", "interface", "ssid", "rssi_dbm", "tx_rate_mbps", "channel", "band_ghz"],
+  "properties": {
+    "type": { "const": "wifi" },
+    "v": { "const": 1 },
+    "ts": { "type": "number", "description": "Epoch seconds." },
+    "interface": { "type": "string", "description": "OS interface name, e.g. \"wlan0\", \"en0\"." },
+    "ssid": { "type": ["string", "null"] },
+    "rssi_dbm": { "type": ["integer", "null"], "maximum": 0, "description": "Signal strength; closer to 0 is stronger." },
+    "tx_rate_mbps": { "type": ["number", "null"], "minimum": 0 },
+    "channel": { "type": ["integer", "null"], "minimum": 1 },
+    "band_ghz": { "enum": ["2.4", "5", "6", null], "description": "GHz, as text." }
+  }
+}
